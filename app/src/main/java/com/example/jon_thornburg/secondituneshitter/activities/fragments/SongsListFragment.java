@@ -5,7 +5,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -19,6 +22,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.jon_thornburg.secondituneshitter.R;
+import com.example.jon_thornburg.secondituneshitter.activities.adapters.SongListLoaderAdapter;
+import com.example.jon_thornburg.secondituneshitter.activities.adapters.SongsListAdapter;
+import com.example.jon_thornburg.secondituneshitter.activities.models.ItunesResponse;
+import com.example.jon_thornburg.secondituneshitter.activities.models.SongItem;
+import com.example.jon_thornburg.secondituneshitter.activities.utils.ItunesHttpClient;
+import com.example.jon_thornburg.secondituneshitter.activities.utils.ItunesInterface;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by jon_thornburg on 1/5/17.
@@ -34,6 +51,8 @@ public class SongsListFragment extends Fragment {
     private Activity mActivity;
     private RecyclerView mRecyclerView;
     private String term;
+    private SongsListAdapter mAdapter;
+    private SongListLoaderAdapter mLoaderAdapter;
 
     @Nullable
     @Override
@@ -55,11 +74,24 @@ public class SongsListFragment extends Fragment {
                     InputMethodManager imm = (InputMethodManager)mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
                     Log.d(TAG, "Hiding Keyboard");
-                    calliTunes();
+                    reload(false);
+                    //calliTunes();
                 }
                 return false;
             }
         });
+
+        mLoaderAdapter = new SongListLoaderAdapter(getActivity().getApplicationContext(),R.layout.song_list_item, new SongListLoaderAdapter.OnItemClickListener(){
+            @Override
+            public void onItemClick(SongItem item) {
+                Log.d(TAG, "onItemClick");
+
+            }
+        });
+
+        mRecyclerView = (RecyclerView) mView.findViewById(R.id.recyclerview_songs);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setAdapter(mLoaderAdapter);
         return mView;
     }
 
@@ -74,9 +106,206 @@ public class SongsListFragment extends Fragment {
         return newFrag;
     }
 
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        Log.d(TAG, " - onActivityCreated");
+        super.onActivityCreated(savedInstanceState);
+        reload(true);
+
+    }
+
+    private void reload(boolean init) {
+        if (init) {
+            getLoaderManager().initLoader(ALL_SONGS_LOADER, null, mLoaderCallback);
+        } else {
+            getLoaderManager().restartLoader(ALL_SONGS_LOADER, null, mLoaderCallback);
+        }
+
+    }
     private void calliTunes() {
         mRecyclerView = (RecyclerView) mView.findViewById(R.id.recyclerview_songs);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(mActivity, 2));
-        //mRecyclerView.setAdapter(new SongsListAdapter(mActivity));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        ItunesInterface mInterface =ItunesHttpClient.getClient().create(ItunesInterface.class);
+
+        Call<ItunesResponse> call = mInterface.getItunesItems(term);
+        call.enqueue(new Callback<ItunesResponse>() {
+
+            @Override
+            public void onResponse(Call<ItunesResponse> call, Response<ItunesResponse> response) {
+                List<SongItem> items = response.body().getResults();
+                Log.d(TAG, "There were " + items.size() + "items received. The first was " + items.get(0).getTrackName());
+                mRecyclerView.setAdapter(new SongsListAdapter(getActivity().getApplicationContext(),
+                        items, R.layout.song_list_item, new SongsListAdapter.OnItemClickListener(){
+                    @Override
+                    public void onItemClick(SongItem item) {
+
+                    }
+                }));
+            }
+
+            @Override
+            public void onFailure(Call<ItunesResponse> call, Throwable t) {
+
+            }
+        });
+    }
+    protected static final int ALL_SONGS_LOADER = 0;
+    private LoaderManager.LoaderCallbacks<List<SongItem>> mLoaderCallback = new LoaderManager.LoaderCallbacks<List<SongItem>>() {
+
+        @Override
+        public Loader<List<SongItem>> onCreateLoader(int loaderId, Bundle args) {
+            Log.d(TAG, "[onCreateLoader]");
+            switch (loaderId) {
+                case ALL_SONGS_LOADER:
+                    SongListLoader loader = new SongListLoader(getActivity(), "the stooges");
+                    Log.d(TAG, "[onCreateLoader] ");
+
+                    if (mEditText.getText() != null) {
+                        loader = new SongListLoader(getActivity(), mEditText.getText().toString());
+                    }
+
+                    return loader;
+            }
+            return null;
+
+        }
+
+        @Override
+        public void onLoadFinished(Loader<List<SongItem>> loader, List<SongItem> result) {
+            Log.d(TAG, "onLoadFinished " + result.size());
+            List<SongItem> items = result;
+            mLoaderAdapter.swapItems(items);
+            mLoaderAdapter.notifyDataSetChanged();
+            //onCursorLoaderFinished(result);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<SongItem>> loader) {
+            mLoaderAdapter.swapItems(null);
+        }
+
+    };
+
+    public static class SongListLoader extends AsyncTaskLoader<List<SongItem>> {
+
+        List<SongItem> mItems;
+        String term;
+        public SongListLoader(Context context, String term) {
+            super(context);
+            this.term = term;
+        }
+
+        /**
+         * This is where the bulk of our work is done.  This function is
+         * called in a background thread and should generate a new set of
+         * data to be published by the loader.
+         */
+        @Override public List<SongItem> loadInBackground() {
+
+
+            final Context context = getContext();
+            ItunesInterface mInterface =ItunesHttpClient.getClient().create(ItunesInterface.class);
+
+            Call<ItunesResponse> call = mInterface.getItunesItems(term);
+            List<SongItem> items = new ArrayList<>();
+            try {
+                items = call.execute().body().getResults();
+            } catch (IOException exception) {
+                Log.e(TAG, "Failed", exception);
+            }
+
+
+            // Done!
+            return items;
+        }
+
+        /**
+         * Called when there is new data to deliver to the client.  The
+         * super class will take care of delivering it; the implementation
+         * here just adds a little more logic.
+         */
+        @Override public void deliverResult(List<SongItem> apps) {
+            if (isReset()) {
+                // An async query came in while the loader is stopped.  We
+                // don't need the result.
+                if (apps != null) {
+                    onReleaseResources(apps);
+                }
+            }
+            List<SongItem> oldApps = mItems;
+            mItems = apps;
+
+            if (isStarted()) {
+                // If the Loader is currently started, we can immediately
+                // deliver its results.
+                super.deliverResult(apps);
+            }
+
+            // At this point we can release the resources associated with
+            // 'oldApps' if needed; now that the new result is delivered we
+            // know that it is no longer in use.
+            if (oldApps != null) {
+                onReleaseResources(oldApps);
+            }
+        }
+
+        /**
+         * Handles a request to start the Loader.
+         */
+        @Override protected void onStartLoading() {
+            if (mItems != null) {
+                // If we currently have a result available, deliver it
+                // immediately.
+                deliverResult(mItems);
+            }
+
+
+            if (takeContentChanged() || mItems == null) {
+                // If the data has changed since the last time it was loaded
+                // or is not currently available, start a load.
+                forceLoad();
+            }
+        }
+
+        /**
+         * Handles a request to stop the Loader.
+         */
+        @Override protected void onStopLoading() {
+            // Attempt to cancel the current load task if possible.
+            cancelLoad();
+        }
+
+        /**
+         * Handles a request to cancel a load.
+         */
+        @Override public void onCanceled(List<SongItem> apps) {
+            super.onCanceled(apps);
+
+            // At this point we can release the resources associated with 'apps'
+            // if needed.
+            onReleaseResources(apps);
+        }
+
+        /**
+         * Handles a request to completely reset the Loader.
+         */
+        @Override protected void onReset() {
+            super.onReset();
+
+            // Ensure the loader is stopped
+            onStopLoading();
+
+        }
+
+        /**
+         * Helper function to take care of releasing resources associated
+         * with an actively loaded data set.
+         */
+        protected void onReleaseResources(List<SongItem> apps) {
+            // For a simple List<> there is nothing to do.  For something
+            // like a Cursor, we would close it here.
+        }
     }
 }

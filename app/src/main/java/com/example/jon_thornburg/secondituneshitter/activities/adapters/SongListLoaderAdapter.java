@@ -12,33 +12,33 @@ import android.widget.TextView;
 import com.example.jon_thornburg.secondituneshitter.R;
 import com.example.jon_thornburg.secondituneshitter.activities.models.SongItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by jon_thornburg on 1/5/17.
+ * Created by jon_thornburg on 1/6/17.
  */
 
-public class SongsListAdapter extends RecyclerView.Adapter<SongsListAdapter.SongViewHolder> {
+public class SongListLoaderAdapter extends RecyclerView.Adapter<SongListLoaderAdapter.SongViewHolder> {
 
     public interface OnItemClickListener {
         void onItemClick(SongItem item);
     }
 
     private Context context;
-    private List<SongItem> items;
+    private List<SongItem> items = new ArrayList<>();
     private int rowLayout;
     public static final String TAG = SongsListAdapter.class.getSimpleName();
     private final OnItemClickListener listener;
 
-    public SongsListAdapter(Context context, List<SongItem> items, int rowLayout, OnItemClickListener listener) {
+    public SongListLoaderAdapter(Context context, int rowLayout, OnItemClickListener listener) {
         this.context = context;
-        this.items = items;
         this.rowLayout = rowLayout;
         this.listener = listener;
     }
 
     @Override
-    public SongsListAdapter.SongViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public SongListLoaderAdapter.SongViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(rowLayout, parent, false);
         return new SongViewHolder(view);
     }
@@ -49,6 +49,11 @@ public class SongsListAdapter extends RecyclerView.Adapter<SongsListAdapter.Song
         holder.albumName.setText(items.get(position).getCollectionName());
         holder.artistName.setText(items.get(position).getArtistName());
         holder.bind(items.get(position), listener);
+    }
+
+    public void swapItems(List<SongItem> newItems) {
+        items.clear();
+        items.addAll(newItems);
     }
 
     @Override
