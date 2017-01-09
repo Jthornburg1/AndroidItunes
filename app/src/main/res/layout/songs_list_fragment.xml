@@ -8,6 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/textedit_height"
         android:gravity="left"
+        android:backgroundTint="@color/colorPrimaryDark"
+        android:textColor="@color/colorPrimaryDark"
         android:imeOptions="actionSearch"
         android:inputType="textAutoComplete"
         android:ellipsize="start"/>

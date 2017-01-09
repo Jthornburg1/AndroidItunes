@@ -2,6 +2,7 @@ package com.example.jon_thornburg.secondituneshitter.activities.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,6 +87,7 @@ public class SongListLoaderAdapter extends RecyclerView.Adapter<SongListLoaderAd
                 @Override
                 public void onClick(View v) {
                     listener.onItemClick(item);
+                    Log.d(TAG, "You just clicked a cell!!!");
                 }
             });
         }

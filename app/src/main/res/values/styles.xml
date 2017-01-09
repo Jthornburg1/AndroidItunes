@@ -20,4 +20,20 @@
         <item name="android:padding">@dimen/text_padding</item>
     </style>
 
+    <style name="LargeWhiteText">
+        <!-- Customize your theme here. -->
+        <item name="android:textSize">@dimen/detail_big_text</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:padding">@dimen/text_padding</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="NarrowWhiteText">
+        <!-- Customize your theme here. -->
+        <item name="android:textSize">@dimen/detail_small_text</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:padding">@dimen/text_padding</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
 </resources>
