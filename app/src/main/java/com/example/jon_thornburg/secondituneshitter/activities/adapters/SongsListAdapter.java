@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.jon_thornburg.secondituneshitter.R;
@@ -58,7 +57,6 @@ public class SongsListAdapter extends RecyclerView.Adapter<SongsListAdapter.Song
 
     public static class SongViewHolder extends RecyclerView.ViewHolder {
 
-        LinearLayout songLayout;
         TextView songTitle;
         TextView artistName;
         TextView albumName;
@@ -67,9 +65,8 @@ public class SongsListAdapter extends RecyclerView.Adapter<SongsListAdapter.Song
         public SongViewHolder(View itemView) {
             super(itemView);
 
-            songLayout = (LinearLayout) itemView.findViewById(R.id.items_layout);
             songTitle = (TextView) itemView.findViewById(R.id.title_text);
-            artistName = (TextView) itemView.findViewById(R.id.album_text);
+            artistName = (TextView) itemView.findViewById(R.id.artist_text);
             albumName = (TextView) itemView.findViewById(R.id.album_text);
             songImage = (ImageView) itemView.findViewById(R.id.song_image);
         }

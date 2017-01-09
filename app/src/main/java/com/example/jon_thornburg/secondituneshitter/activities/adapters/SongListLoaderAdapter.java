@@ -6,11 +6,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.jon_thornburg.secondituneshitter.R;
 import com.example.jon_thornburg.secondituneshitter.activities.models.SongItem;
+import com.example.jon_thornburg.secondituneshitter.activities.utils.PicassoImageManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +49,10 @@ public class SongListLoaderAdapter extends RecyclerView.Adapter<SongListLoaderAd
         holder.albumName.setText(items.get(position).getCollectionName());
         holder.artistName.setText(items.get(position).getArtistName());
         holder.bind(items.get(position), listener);
+        /*ImageAsyncTask task = new ImageAsyncTask(holder.songImage, context);
+        task.execute(items.get(position).getArtworkUrl60());*/
+        PicassoImageManager imageManager = new PicassoImageManager();
+        imageManager.loadImagePicasso(holder.songImage, items.get(position).getArtworkUrl60(),context);
     }
 
     public void swapItems(List<SongItem> newItems) {
@@ -63,7 +67,6 @@ public class SongListLoaderAdapter extends RecyclerView.Adapter<SongListLoaderAd
 
     public static class SongViewHolder extends RecyclerView.ViewHolder {
 
-        LinearLayout songLayout;
         TextView songTitle;
         TextView artistName;
         TextView albumName;
@@ -72,9 +75,8 @@ public class SongListLoaderAdapter extends RecyclerView.Adapter<SongListLoaderAd
         public SongViewHolder(View itemView) {
             super(itemView);
 
-            songLayout = (LinearLayout) itemView.findViewById(R.id.items_layout);
             songTitle = (TextView) itemView.findViewById(R.id.title_text);
-            artistName = (TextView) itemView.findViewById(R.id.album_text);
+            artistName = (TextView) itemView.findViewById(R.id.artist_text);
             albumName = (TextView) itemView.findViewById(R.id.album_text);
             songImage = (ImageView) itemView.findViewById(R.id.song_image);
         }

@@ -8,4 +8,16 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="SmallTextStyle">
+        <!-- Customize your theme here. -->
+        <item name="android:textSize">@dimen/item_small_text</item>
+        <item name="android:padding">@dimen/text_padding</item>
+    </style>
+
+    <style name="LargeTextStyle">
+        <!-- Customize your theme here. -->
+        <item name="android:textSize">@dimen/item_large_text</item>
+        <item name="android:padding">@dimen/text_padding</item>
+    </style>
+
 </resources>
