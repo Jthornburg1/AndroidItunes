@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/nearBlack">
-
     <TextView
         android:id="@+id/artist_name"
         android:layout_width="match_parent"
@@ -32,8 +31,8 @@
 
     <ImageView
         android:id="@+id/detail_image"
-        android:layout_height="@dimen/detail_image_height"
-        android:layout_width="@dimen/detail_image_height"
+        android:layout_height="@dimen/detail_image_tablet"
+        android:layout_width="@dimen/detail_image_tablet"
         android:layout_centerHorizontal="true"
         android:scaleType="centerCrop"
         android:layout_marginTop="@dimen/detail_image_top_margin"

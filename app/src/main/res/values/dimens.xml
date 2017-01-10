@@ -18,5 +18,6 @@
     <dimen name="detail_big_text">20sp</dimen>
     <dimen name="detail_small_text">15sp</dimen>
     <dimen name="detail_image_top_margin">20dp</dimen>
+    <dimen name="detail_image_tablet">350dp</dimen>
 
 </resources>
