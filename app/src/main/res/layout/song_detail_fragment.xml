@@ -2,10 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorWhite">
+    android:background="@color/nearBlack">
 
-    <EditText
-        android:id="@+id/textedit"
+    <TextView
+        android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="@dimen/textedit_height"
         android:gravity="left"
@@ -13,13 +13,8 @@
         android:textColor="@color/colorPrimaryDark"
         android:imeOptions="actionSearch"
         android:inputType="textAutoComplete"
+        android:text="detail"
         android:ellipsize="start"/>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerview_songs"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-    </android.support.v7.widget.RecyclerView>
 
 </LinearLayout>

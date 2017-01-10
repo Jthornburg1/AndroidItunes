@@ -1,6 +1,7 @@
 package com.example.jon_thornburg.secondituneshitter.activities.adapters;
 
 import android.content.Context;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.jon_thornburg.secondituneshitter.R;
+import com.example.jon_thornburg.secondituneshitter.activities.fragments.DetailSongFragment;
 import com.example.jon_thornburg.secondituneshitter.activities.models.SongItem;
 import com.example.jon_thornburg.secondituneshitter.activities.utils.PicassoImageManager;
 
@@ -22,17 +24,13 @@ import java.util.List;
 
 public class SongListLoaderAdapter extends RecyclerView.Adapter<SongListLoaderAdapter.SongViewHolder> {
 
-    public interface OnItemClickListener {
-        void onItemClick(SongItem item);
-    }
-
     private Context context;
     private List<SongItem> items = new ArrayList<>();
     private int rowLayout;
     public static final String TAG = SongsListAdapter.class.getSimpleName();
-    private final OnItemClickListener listener;
+    private final OnItemClickListener<SongItem> listener;
 
-    public SongListLoaderAdapter(Context context, int rowLayout, OnItemClickListener listener) {
+    public SongListLoaderAdapter(Context context, int rowLayout, OnItemClickListener<SongItem> listener) {
         this.context = context;
         this.rowLayout = rowLayout;
         this.listener = listener;
@@ -49,7 +47,19 @@ public class SongListLoaderAdapter extends RecyclerView.Adapter<SongListLoaderAd
         holder.songTitle.setText(items.get(position).getTrackName());
         holder.albumName.setText(items.get(position).getCollectionName());
         holder.artistName.setText(items.get(position).getArtistName());
+        holder.itemView.setTag(items.get(position));
         holder.bind(items.get(position), listener);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    Log.d(TAG, "onClick");
+                    SongItem item = (SongItem) v.getTag();
+                    Log.d(TAG, "onClick " + item.getTrackName());
+                    listener.onItemClick(item);
+                }
+            }
+        });
         /*ImageAsyncTask task = new ImageAsyncTask(holder.songImage, context);
         task.execute(items.get(position).getArtworkUrl60());*/
         PicassoImageManager imageManager = new PicassoImageManager();
@@ -58,7 +68,15 @@ public class SongListLoaderAdapter extends RecyclerView.Adapter<SongListLoaderAd
 
     public void swapItems(List<SongItem> newItems) {
         items.clear();
-        items.addAll(newItems);
+        if (newItems != null) {
+            items.addAll(newItems);
+        }
+
+    }
+
+    private void replaceFragment(SongItem item) {
+        Log.d(TAG, "replaceFragment: presenting detail for " + item.getTrackName());
+        Fragment fragment = DetailSongFragment.newInstance(item);
     }
 
     @Override
@@ -87,7 +105,7 @@ public class SongListLoaderAdapter extends RecyclerView.Adapter<SongListLoaderAd
                 @Override
                 public void onClick(View v) {
                     listener.onItemClick(item);
-                    Log.d(TAG, "You just clicked a cell!!!");
+                    Log.d(TAG, "You just clicked a cell!!! " + item.getTrackName());
                 }
             });
         }

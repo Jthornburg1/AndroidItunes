@@ -31,10 +31,10 @@
 
     <ImageView
         android:id="@+id/detail_image"
-        android:layout_width="@dimen/detail_image_height"
         android:layout_height="@dimen/detail_image_height"
-        android:layout_alignParentBottom="true"
-        android:scaleType="fitXY"
+        android:layout_width="@dimen/detail_image_height"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop"
         android:layout_marginTop="@dimen/detail_image_top_margin"
         android:layout_below="@id/release_date"/>
 

@@ -22,8 +22,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.jon_thornburg.secondituneshitter.R;
+import com.example.jon_thornburg.secondituneshitter.activities.INavigation;
+import com.example.jon_thornburg.secondituneshitter.activities.adapters.OnItemClickListener;
 import com.example.jon_thornburg.secondituneshitter.activities.adapters.SongListLoaderAdapter;
-import com.example.jon_thornburg.secondituneshitter.activities.adapters.SongsListAdapter;
 import com.example.jon_thornburg.secondituneshitter.activities.models.ItunesResponse;
 import com.example.jon_thornburg.secondituneshitter.activities.models.SongItem;
 import com.example.jon_thornburg.secondituneshitter.activities.utils.ItunesHttpClient;
@@ -34,14 +35,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Created by jon_thornburg on 1/5/17.
  */
 
-public class SongsListFragment extends Fragment {
+public class SongsListFragment extends Fragment implements OnItemClickListener<SongItem>{
 
     public static final String TAG = SongsListFragment.class.getSimpleName();
     public static final String OBJID = "object_id";
@@ -51,8 +50,8 @@ public class SongsListFragment extends Fragment {
     private Activity mActivity;
     private RecyclerView mRecyclerView;
     private String term;
-    private SongsListAdapter mAdapter;
     private SongListLoaderAdapter mLoaderAdapter;
+    private INavigation mNavigationActivity;
 
     @Nullable
     @Override
@@ -75,24 +74,24 @@ public class SongsListFragment extends Fragment {
                     imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
                     Log.d(TAG, "Hiding Keyboard");
                     reload(false);
-                    //calliTunes();
                 }
                 return false;
             }
         });
 
-        mLoaderAdapter = new SongListLoaderAdapter(getActivity().getApplicationContext(),R.layout.song_list_item, new SongListLoaderAdapter.OnItemClickListener(){
-            @Override
-            public void onItemClick(SongItem item) {
-                Log.d(TAG, "onItemClick");
-
-            }
-        });
+        mLoaderAdapter = new SongListLoaderAdapter(getActivity(),R.layout.song_list_item, this);
 
         mRecyclerView = (RecyclerView) mView.findViewById(R.id.recyclerview_songs);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(mLoaderAdapter);
         return mView;
+    }
+
+    @Override
+    public void onItemClick(SongItem item) {
+            Log.d(TAG, "onItemClick" + item.getTrackName());
+        mNavigationActivity.onSongItemClick(item);
+
     }
 
     public static SongsListFragment newInstance(int numToPass/*Object to load into bundle*/) {
@@ -106,6 +105,15 @@ public class SongsListFragment extends Fragment {
         return newFrag;
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof Activity){
+            if (context instanceof INavigation){
+                this.mNavigationActivity = (INavigation) context;
+            }
+        }
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -123,34 +131,7 @@ public class SongsListFragment extends Fragment {
         }
 
     }
-    private void calliTunes() {
-        mRecyclerView = (RecyclerView) mView.findViewById(R.id.recyclerview_songs);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        ItunesInterface mInterface =ItunesHttpClient.getClient().create(ItunesInterface.class);
-
-        Call<ItunesResponse> call = mInterface.getItunesItems(term);
-        call.enqueue(new Callback<ItunesResponse>() {
-
-            @Override
-            public void onResponse(Call<ItunesResponse> call, Response<ItunesResponse> response) {
-                List<SongItem> items = response.body().getResults();
-                Log.d(TAG, "There were " + items.size() + "items received. The first was " + items.get(0).getTrackName());
-                mRecyclerView.setAdapter(new SongsListAdapter(getActivity().getApplicationContext(),
-                        items, R.layout.song_list_item, new SongsListAdapter.OnItemClickListener(){
-                    @Override
-                    public void onItemClick(SongItem item) {
-
-                    }
-                }));
-            }
-
-            @Override
-            public void onFailure(Call<ItunesResponse> call, Throwable t) {
-
-            }
-        });
-    }
     protected static final int ALL_SONGS_LOADER = 0;
     private LoaderManager.LoaderCallbacks<List<SongItem>> mLoaderCallback = new LoaderManager.LoaderCallbacks<List<SongItem>>() {
 
